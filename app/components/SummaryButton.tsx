@@ -1,16 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import TermCard from "./TermCard";
 
 export default function SummaryButton({
     abstract,
+    paperId,
 }: {
     abstract: string;
+    paperId: string;
 }) {
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        setResult(null);
+    }, [abstract]);
+
     async function handleClick() {
+
+        const cache = localStorage.getItem(
+            `summary-${paperId}`
+        );
+
+        if (cache) {
+            setResult(JSON.parse(cache));
+            return;
+        }
+
         setLoading(true);
 
         const response = await fetch("/api/summarize", {
@@ -26,6 +43,11 @@ export default function SummaryButton({
         const data = await response.json();
 
         setResult(data);
+
+        localStorage.setItem(
+            `summary-${paperId}`,
+            JSON.stringify(data)
+        );
         setLoading(false);
     }
 
@@ -53,29 +75,68 @@ export default function SummaryButton({
             <p style={{
                 fontSize: "14px",
                 color: "#666",
-                marginTop: "5px",
+                marginBottom: "5px",
             }}>
-                3行要約+専門用語解説を生成
+                日本語要約+専門用語解説を生成
             </p>
+
+            {result?.hook && (
+                <div
+                    style={{
+                        background: "#fff7ed",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        marginBottom: "15px",
+                    }}
+                >
+                    <strong>💡 なぜ読む？</strong>
+
+                    <p>{result.hook}</p>
+                </div>
+            )}
 
             {result && (
                 <>
-                    <h2>今日のAI要約</h2>
+                    <h2>AI日本語要約</h2>
 
                     <p style={{ whiteSpace: "pre-wrap" }}>
                         {result.summary}
                     </p>
 
+                    <p
+                        style={{
+                            fontWeight: "bold",
+                            marginTop: "10px",
+                        }}
+                    >
+                        🎓 難易度: {result.difficulty}
+                    </p>
+
+                    {result.highlight && (
+                        <>
+                            <h2>
+                                👀 この論文の見どころ
+                                {result.highlightType && 
+                                    `(${result.highlightType})`}
+                            </h2>
+
+                            <p style={{ whiteSpace: "pre-wrap" }}>
+                                {result.highlight}
+                            </p>
+                        </>
+                    )}
+
                     <h2>📚 専門用語</h2>
 
-                    {result.terms.length > 0 ? (
+                    {result?.terms?.length > 0 ? (
                         <ul>
-                            {result.terms.map((term: any) => (
-                                <li key={term.word}>
-                                    <strong>{term.word}</strong>
-                                    <br />
-                                    {term.explanation}
-                                </li>
+                            {result.terms.map((term: any, index: number) => (
+                                <TermCard
+                                    key={`${term.english}-${index}`}
+                                    english={term.english}
+                                    japanese={term.japanese}
+                                    explanation={term.explanation}
+                                />
                             ))}
                         </ul>
                     ) : (
