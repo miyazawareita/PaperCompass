@@ -1,4 +1,4 @@
-import { generateExplanation } from "@/lib/gemini";
+import { generateExplanation } from "@/app/lib/gemini";
 
 export async function POST(request: Request) {
     try {

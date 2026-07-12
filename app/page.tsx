@@ -1,6 +1,6 @@
 import { parseStringPromise } from "xml2js";
-import SummaryButton from "./components/SummaryButton";
 import PaperList from "./components/PaperList";
+import type { Paper } from "./types/Paper";
 
 export default async function Home() {
 
@@ -25,7 +25,7 @@ export default async function Home() {
     );
 
     const recentPapers = papers.filter(
-        (paper: any) => {
+        (paper: Paper) => {
             const published = new Date(
                 paper.published[0]
             );
@@ -34,17 +34,11 @@ export default async function Home() {
         }
     );
 
-    const shuffled = [...recentPapers].sort(
-        () => Math.random() - 0.5
-    );
-
-    const papersToShow = shuffled.slice(0, 5);
-
     return (
         <main>
-            <h1>論文Duolingo</h1>
+            <h1>論文News</h1>
 
-            <PaperList papers={papersToShow} />
+            <PaperList papers={recentPapers} />
         </main>
     );
 }

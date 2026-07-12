@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import TermCard from "./TermCard";
+import type { Term, SummaryResult } from "../types/SummaryResult";
 
 export default function SummaryButton({
     abstract,
@@ -10,8 +11,8 @@ export default function SummaryButton({
     abstract: string;
     paperId: string;
 }) {
-    const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<SummaryResult | null>(null);
 
     useEffect(() => {
         setResult(null);
@@ -130,7 +131,7 @@ export default function SummaryButton({
 
                     {result?.terms?.length > 0 ? (
                         <ul>
-                            {result.terms.map((term: any, index: number) => (
+                            {result.terms.map((term: Term, index: number) => (
                                 <TermCard
                                     key={`${term.english}-${index}`}
                                     english={term.english}

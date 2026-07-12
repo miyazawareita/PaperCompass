@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📄 PaperNews
 
-## Getting Started
+最新のAI論文を日本語で手軽に読めるWebアプリです。
 
-First, run the development server:
+arXivから最新論文を取得し、Gemini APIを利用して要約・専門用語解説を生成します。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ 主な機能
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 📚 最新AI論文を毎回ランダムに5件表示
+- 🏷️ カテゴリ別フィルタ
+- 🤖 AIによる日本語要約
+- 💡 「読む理由」の生成
+- 📖 専門用語の解説
+- ⭐ ブックマーク機能
+- 🔗 arXivへのリンク
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 使用技術
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js
+- React
+- TypeScript
+- Gemini API
+- arXiv API
+- xml2js
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 画面
 
-## Deploy on Vercel
+（スクリーンショットを追加予定）
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 今後追加したい機能
+
+- 検索機能
+- おすすめ論文表示
+- AIによる興味分析
+- 学習履歴
+
+---
+
+## 開発背景
+
+英語論文は読み始めるハードルが高く、
+「まず内容をざっくり知りたい」という課題を解決するために制作しました。
+
+AI要約・専門用語解説を通して、
+論文に興味を持つきっかけを提供することを目的としています。
