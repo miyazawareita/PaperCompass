@@ -64,7 +64,8 @@ ${abstract}
 
         return JSON.parse(raw);
 
-    } catch {
+    } catch (error) {
+        console.error(error);
         return {
             summary: "AI要約を生成できませんでした。",
             hook: "",
@@ -72,5 +73,4 @@ ${abstract}
             terms: [],
         };
     }
-    console.log("終了");
 }
