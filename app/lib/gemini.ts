@@ -3,6 +3,12 @@ import { GoogleGenAI } from "@google/genai";
 export async function generateExplanation(
     abstract: string
 ) {
+console.log(
+    process.env.GEMINI_API_KEY
+        ? "APIkey is set"
+        : "APIkey is not set"
+);
+
     const ai = new GoogleGenAI({
         apiKey: process.env.GEMINI_API_KEY!,
     });
