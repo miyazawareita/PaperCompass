@@ -9,9 +9,13 @@ console.log(
         : "APIkey is not set"
 );
 
+    console.log("開始");
+
     const ai = new GoogleGenAI({
         apiKey: process.env.GEMINI_API_KEY!,
     });
+
+    console.log("生成");
 
     try {
         const response = await ai.models.generateContent({
@@ -68,4 +72,5 @@ ${abstract}
             terms: [],
         };
     }
+    console.log("終了");
 }
