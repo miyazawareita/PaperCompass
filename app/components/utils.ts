@@ -1,4 +1,6 @@
-export function formatCategories(categories: any[]) {
+import type { Category } from "../types/Paper";
+
+export function formatCategories(categories: Category[]) {
     if (!categories) return [];
 
     return categories.map((c) => c.$.term);
@@ -24,20 +26,6 @@ export function categoryLabel(term: string) {
     };
 
     return map[term] ?? term;
-}
-
-export function getReadingTime(text: string) {
-    const words = text.split(/\s+/).length;
-
-    if (words < 150) {
-        return "🟢 1〜2分";
-    }
-
-    if (words < 300) {
-        return "🟡 3〜5分";
-    }
-
-    return "🔴 5分以上";
 }
 
 export function getDaysAgo(dateString: string) {

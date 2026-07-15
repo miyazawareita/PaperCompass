@@ -98,36 +98,40 @@ export default function SummaryButton({
 
             {result && (
                 <>
-                    <h2>AI日本語要約</h2>
-
-                    <p style={{ whiteSpace: "pre-wrap" }}>
-                        {result.summary}
-                    </p>
 
                     <p
                         style={{
                             fontWeight: "bold",
                             marginTop: "10px",
+                            marginBottom: "10px",
                         }}
                     >
                         🎓 難易度: {result.difficulty}
+                        <br />
+                        {result.difficulty_reason}
                     </p>
 
-                    {result.highlight && (
-                        <>
-                            <h2>
-                                👀 この論文の見どころ
-                                {result.highlightType && 
-                                    `(${result.highlightType})`}
-                            </h2>
+                    <h2
+                        style={{
+                            marginTop: "10px",
+                            marginBottom: "5px",
+                        }}
+                    >
+                        🤖 AI要約
+                    </h2>
 
-                            <p style={{ whiteSpace: "pre-wrap" }}>
-                                {result.highlight}
-                            </p>
-                        </>
-                    )}
+                    <p style={{ whiteSpace: "pre-wrap" }}>
+                        {result.summary}
+                    </p>
 
-                    <h2>📚 専門用語</h2>
+                    <h2
+                        style={{
+                            marginTop: "10px",
+                            marginBottom: "5px",
+                        }}
+                    >
+                        📚 重要キーワード
+                    </h2>
 
                     {result?.terms?.length > 0 ? (
                         <ul>

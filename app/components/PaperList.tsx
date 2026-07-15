@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import SummaryButton from "./SummaryButton";
-import AbstractSection from "./AbstractSection";
 import PaperCard from "./PaperCard";
 import { categoryLabel } from "./utils";
 import { loadBookmarks, saveBookmarks } from "../lib/bookmark";
@@ -23,6 +22,11 @@ export default function PaperList({
     const [displayPapers, setDisplayPapers] = useState<Paper[]>([]);
 
     const detaiRef = useRef<HTMLDivElement>(null);
+
+    const [cathover, setCatHover] = useState<string | null>(null);
+    const [shufhover, setShufHover] = useState(false);
+    const [bookhover, setBookHover] = useState(false);
+    const [bookmarkHover, setBookmarkHover] = useState<string | null>(null);
 
     const filteredPapers =
         selectedCategory === "ALL"
@@ -108,14 +112,20 @@ export default function PaperList({
                         onClick={() =>
                             setSelectedCategory(category)
                         }
+                        onMouseEnter={() => setCatHover(category)}
+                        onMouseLeave={() => setCatHover(null)}
                         style={{
                             padding: "6px 12px",
                             borderRadius: "20px",
                             border: "1px solid #ddd",
+                            cursor: "pointer",
+                            transition: "background-color 0.2s, color 0.2s",
                             backgroundColor:
                                 selectedCategory === category
                                     ? "#2563eb"
-                                    : "white",
+                                    : cathover === category
+                                        ? "#f8faff"
+                                        : "white",
                             color:
                                 selectedCategory === category
                                     ? "white"
@@ -135,11 +145,15 @@ export default function PaperList({
                         pickRandomPapers(filteredPapers,5)
                     );
                 }}
+                onMouseEnter={() => setShufHover(true)}
+                onMouseLeave={() => setShufHover(false)}
                 style={{
                     padding: "8px 12px",
                     borderRadius: "8px",
                     border: "1px solid #ddd",
                     cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: shufhover ? "#f8faff" : "white",
                 }}
             >
                 🔄 論文をシャッフル
@@ -180,30 +194,16 @@ export default function PaperList({
                 }}
             >
 
-                <h3>
+                <h3
+                    style={{
+                        fontSize: "18px",
+                        fontWeight: "bold",
+                    }}
+                >
                     {selectedPaper.title[0]}
                 </h3>
 
-                <button
-                    onClick={() =>
-                        saveBookmark(selectedPaper)
-                    }
-                    style={{
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid #ddd",
-                        cursor: "pointer",
-                    }}
-                >
-                    ⭐ 保存
-                </button>
-
-                <a
-                    href={selectedPaper.id[0]}
-                    target="_blank"
-                >
-                    arXivで読む →
-                </a>
+                
 
                 <p>
                     📅 {selectedPaper.published?.[0]
@@ -225,11 +225,44 @@ export default function PaperList({
                     paperId={selectedPaper.id[0]}
                 />
 
-                <AbstractSection
-                    abstract={selectedPaper.summary[0]}
-                />
+                <button
+                    onClick={() =>
+                        saveBookmark(selectedPaper)
+                    }
+                    onMouseEnter={() => setBookHover(true)}
+                    onMouseLeave={() => setBookHover(false)}
+                    style={{
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        cursor: "pointer",
+                        backgroundColor: bookhover ? "#f8faff" : "white",
+                    }}
+                >
+                    ⭐ 保存
+                </button>
 
-                <h2>⭐ 保存した研究</h2>
+                <a
+                    href={selectedPaper.id[0]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                        color: "#2563eb",
+                        textDecoration: "none",
+                        fontWeight: "bold",
+                    }}
+                >
+                    📄 arXivで全文を読む ↗
+                </a>
+
+                <h2
+                    style={{
+                        marginTop: "20px",
+                        marginBottom: "10px",
+                    }}
+                >
+                    ⭐ 保存した研究
+                </h2>
 
                 {bookmarks.map((bookmark) => (
 
@@ -248,14 +281,15 @@ export default function PaperList({
                             }, 100);
                         }
                         }
-
+                        onMouseEnter={() => setBookmarkHover(bookmark.id[0])}
+                        onMouseLeave={() => setBookmarkHover(null)}
                         style={{
                             border: "1px solid #ddd",
                             padding: "10px",
                             marginBottom: "10px",
                             borderRadius: "8px",
                             cursor: "pointer",
-
+                            backgroundColor: bookmarkHover === bookmark.id[0] ? "#f8faff" : "white",
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center",
@@ -285,6 +319,8 @@ export default function PaperList({
                                 background: "none",
                                 cursor: "pointer",
                                 fontSize: "18px",
+                                backgroundColor: bookmarkHover === bookmark.id[0] ? "#f8faff" : "white",
+                                transition: "background-color 0.2s, color 0.2s",
                             }}
                         >
                             ❌

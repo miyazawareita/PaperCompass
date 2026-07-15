@@ -36,7 +36,7 @@ export default async function Home() {
 
     return (
         <main>
-            <h1>論文News</h1>
+            <h1>PaperCompass</h1>
 
             <PaperList papers={recentPapers} />
         </main>

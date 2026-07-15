@@ -14,9 +14,3 @@ export function saveBookmarks(
 ): void {
     localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
 }
-
-export function removeBookmarks(
-    paperId: string
-): void {
-    // Implementation for removing bookmark
-}
