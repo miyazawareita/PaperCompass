@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import TermCard from "./TermCard";
 import type { Term, SummaryResult } from "../types/SummaryResult";
 
@@ -12,44 +12,38 @@ export default function SummaryButton({
     paperId: string;
 }) {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<SummaryResult | null>(null);
 
-    useEffect(() => {
-        setResult(null);
-    }, [abstract]);
-
     async function handleClick() {
-
-        const cache = localStorage.getItem(
-            `summary-${paperId}`
-        );
-
+        const cache = localStorage.getItem(`summary-${paperId}`);
         if (cache) {
             setResult(JSON.parse(cache));
             return;
         }
 
         setLoading(true);
+        setError(null);
 
-        const response = await fetch("/api/summarize", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                abstract,
-            }),
-        });
+        try {
+            const response = await fetch("/api/summarize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ abstract }),
+            });
 
-        const data = await response.json();
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
 
-        setResult(data);
-
-        localStorage.setItem(
-            `summary-${paperId}`,
-            JSON.stringify(data)
-        );
-        setLoading(false);
+            const data = await response.json();
+            setResult(data);
+            localStorage.setItem(`summary-${paperId}`, JSON.stringify(data));
+        } catch {
+            setError("AI要約の生成に失敗しました。もう一度お試しください。");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -73,13 +67,13 @@ export default function SummaryButton({
                 {loading ? "⏳ 生成中..." : "🤖 AI解説を生成"}
             </button>
 
-            <p style={{
-                fontSize: "14px",
-                color: "#666",
-                marginBottom: "5px",
-            }}>
+            <p style={{ fontSize: "14px", color: "#666", marginBottom: "5px" }}>
                 日本語要約+専門用語解説を生成
             </p>
+
+            {error && (
+                <p style={{ color: "#dc2626", marginTop: "10px" }}>{error}</p>
+            )}
 
             {result?.hook && (
                 <div
@@ -91,53 +85,32 @@ export default function SummaryButton({
                     }}
                 >
                     <strong>💡 なぜ読む？</strong>
-
                     <p>{result.hook}</p>
                 </div>
             )}
 
             {result && (
                 <>
-
-                    <p
-                        style={{
-                            fontWeight: "bold",
-                            marginTop: "10px",
-                            marginBottom: "10px",
-                        }}
-                    >
+                    <p style={{ fontWeight: "bold", marginTop: "10px", marginBottom: "10px" }}>
                         🎓 難易度: {result.difficulty}
                         <br />
                         {result.difficulty_reason}
                     </p>
 
-                    <h2
-                        style={{
-                            marginTop: "10px",
-                            marginBottom: "5px",
-                        }}
-                    >
+                    <h2 style={{ marginTop: "10px", marginBottom: "5px" }}>
                         🤖 AI要約
                     </h2>
+                    <p style={{ whiteSpace: "pre-wrap" }}>{result.summary}</p>
 
-                    <p style={{ whiteSpace: "pre-wrap" }}>
-                        {result.summary}
-                    </p>
-
-                    <h2
-                        style={{
-                            marginTop: "10px",
-                            marginBottom: "5px",
-                        }}
-                    >
+                    <h2 style={{ marginTop: "10px", marginBottom: "5px" }}>
                         📚 重要キーワード
                     </h2>
 
-                    {result?.terms?.length > 0 ? (
+                    {result.terms?.length > 0 ? (
                         <ul>
-                            {result.terms.map((term: Term, index: number) => (
+                            {result.terms.map((term: Term, i: number) => (
                                 <TermCard
-                                    key={`${term.english}-${index}`}
+                                    key={`${term.english}-${i}`}
                                     english={term.english}
                                     japanese={term.japanese}
                                     explanation={term.explanation}

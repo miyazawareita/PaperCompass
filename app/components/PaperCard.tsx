@@ -1,19 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import {
-    formatCategories,
-    categoryLabel,
-    getDaysAgo,
-} from "./utils";
-import type { Paper } from "../types/Paper";
+import { categoryLabel, getDaysAgo } from "./utils";
+import type { NormalizedPaper } from "../types/Paper";
 
 export default function PaperCard({
     paper,
     selected,
     onSelect,
 }: {
-    paper: Paper;
+    paper: NormalizedPaper;
     selected: boolean;
     onSelect: () => void;
 }) {
@@ -38,31 +34,21 @@ export default function PaperCard({
                         : "white",
             }}
         >
-
-            <p style={{ 
-                fontSize: "13px", 
-                color: "#2563eb",
-                marginBottom: "12px", 
-            }}
-            >
-                {formatCategories(paper.category)
-                    .map(categoryLabel)
-                    .join(" ・ ")}
-            </p>
-
-            <h3>{paper.title[0]}</h3>
-
             <p
                 style={{
-                    marginTop: "15px",
-                    color: "#666",
+                    fontSize: "13px",
+                    color: "#2563eb",
+                    marginBottom: "12px",
                 }}
             >
-                {getDaysAgo(
-                    paper.published[0]
-                )}
+                {paper.categories.map(categoryLabel).join(" ・ ")}
             </p>
 
+            <h3>{paper.title}</h3>
+
+            <p style={{ marginTop: "15px", color: "#666" }}>
+                {getDaysAgo(paper.published)}
+            </p>
         </div>
     );
 }

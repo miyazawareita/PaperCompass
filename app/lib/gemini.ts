@@ -1,26 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
+import { summaryCache } from "./cache";
 
-export async function generateExplanation(
-    abstract: string
-) {
-console.log(
-    process.env.GEMINI_API_KEY
-        ? "APIkey is set"
-        : "APIkey is not set"
-);
-
-    console.log("開始");
-
-    const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY!,
-    });
-
-    console.log("生成");
-
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: `
+const PROMPT_TEMPLATE = `
 あなたはJSON APIです。
 JSON以外の文章を絶対に出力しないでください。
 Markdownも使用しないでください。
@@ -55,22 +36,41 @@ Markdownも使用しないでください。
 }
 
 Abstract:
-${abstract}
-`,
+`;
+
+const FALLBACK_RESULT = {
+    summary: "AI要約を生成できませんでした。",
+    hook: "",
+    difficulty: "",
+    difficulty_reason: "",
+    terms: [],
+};
+
+export async function generateExplanation(abstract: string) {
+    const cacheKey = `summary:${abstract.slice(0, 200)}`;
+    const cached = summaryCache.get(cacheKey);
+    if (cached) return cached;
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        console.error("GEMINI_API_KEY is not set");
+        return FALLBACK_RESULT;
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `${PROMPT_TEMPLATE}${abstract}`,
         });
 
-        const raw =
-            response.text?.replace(/```json|```/g, "").trim() ?? "{}";
-
-        return JSON.parse(raw);
-
+        const raw = response.text?.replace(/```json|```/g, "").trim() ?? "{}";
+        const result = JSON.parse(raw);
+        summaryCache.set(cacheKey, result);
+        return result;
     } catch (error) {
-        console.error(error);
-        return {
-            summary: "AI要約を生成できませんでした。",
-            hook: "",
-            difficulty: "",
-            terms: [],
-        };
+        console.error("Gemini API error:", error);
+        return FALLBACK_RESULT;
     }
 }

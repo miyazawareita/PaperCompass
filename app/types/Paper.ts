@@ -17,4 +17,13 @@ export type Paper = {
     category: Category[];
 };
 
-export type Bookmark = Paper;
+export type NormalizedPaper = {
+    id: string;
+    title: string;
+    summary: string;
+    published: string;
+    authors: string[];
+    categories: string[];
+};
+
+export type Bookmark = NormalizedPaper;

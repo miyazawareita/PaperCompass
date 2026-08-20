@@ -1,9 +1,18 @@
-import type { Category } from "../types/Paper";
+import type { Paper, NormalizedPaper } from "../types/Paper";
 
-export function formatCategories(categories: Category[]) {
-    if (!categories) return [];
+export function normalizePaper(paper: Paper): NormalizedPaper {
+    return {
+        id: paper.id[0],
+        title: paper.title[0],
+        summary: paper.summary[0],
+        published: paper.published[0],
+        authors: paper.author.map((a) => a.name[0]),
+        categories: paper.category.map((c) => c.$.term),
+    };
+}
 
-    return categories.map((c) => c.$.term);
+export function formatCategories(categories: string[]) {
+    return categories;
 }
 
 export function categoryLabel(term: string) {
@@ -14,7 +23,6 @@ export function categoryLabel(term: string) {
         "cs.CV": "👁️ コンピュータビジョン",
         "cs.RO": "🦾 ロボット工学",
         "eess.SP": "📡 信号処理",
-
         "cs.IR": "🔍 情報検索",
         "cs.CR": "🔒 セキュリティ",
         "cs.DB": "🗄️ データベース",

@@ -1,16 +1,35 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
 import type { Bookmark } from "../types/Paper";
 
-export function loadBookmarks(): Bookmark[] {
-    const saved = localStorage.getItem("bookmarks");
+const STORAGE_KEY = "bookmarks";
 
-    if (saved) {
-        return JSON.parse(saved) as Bookmark[];
-    }
-    return [];
+function subscribe(callback: () => void) {
+    window.addEventListener("storage", callback);
+    return () => window.removeEventListener("storage", callback);
 }
 
-export function saveBookmarks(
-    bookmarks: Bookmark[]
-): void {
-    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+function getSnapshot(): string {
+    return localStorage.getItem(STORAGE_KEY) ?? "[]";
+}
+
+function getServerSnapshot(): string {
+    return "[]";
+}
+
+export function useBookmarks(): [
+    Bookmark[],
+    (updater: (prev: Bookmark[]) => Bookmark[]) => void,
+] {
+    const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+    const bookmarks: Bookmark[] = JSON.parse(raw);
+
+    function setBookmarks(updater: (prev: Bookmark[]) => Bookmark[]) {
+        const next = updater(bookmarks);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        window.dispatchEvent(new Event("storage"));
+    }
+
+    return [bookmarks, setBookmarks];
 }
