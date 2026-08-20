@@ -2,6 +2,8 @@ import { parseStringPromise } from "xml2js";
 import PaperList from "./components/PaperList";
 import type { Paper } from "./types/Paper";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
 
     const response = await fetch(
