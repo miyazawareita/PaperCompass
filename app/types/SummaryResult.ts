@@ -9,7 +9,5 @@ export type SummaryResult = {
     hook: string;
     difficulty: string;
     difficulty_reason: string;
-    highlight: string;
-    highlightType: string;
     terms: Term[];
 };

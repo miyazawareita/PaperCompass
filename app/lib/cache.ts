@@ -39,5 +39,4 @@ export class MemoryCache<T> {
     }
 }
 
-export const arxivCache = new MemoryCache<string>(5 * 60); // 5 minutes
 export const summaryCache = new MemoryCache<unknown>(60 * 60); // 1 hour

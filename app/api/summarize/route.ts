@@ -1,45 +1,33 @@
-import { generateExplanation } from "@/app/lib/gemini";
+import { generateExplanation, GeminiError } from "@/app/lib/gemini";
+import { fetchPaperById, isValidArxivId } from "@/app/lib/arxiv";
 
+// 任意の文章ではなくarXiv IDだけを受け取り、Abstractはサーバー側で取得する。
+// これでこのAPIが「誰でも使えるGeminiの中継」として悪用されるのを防ぐ。
 export async function POST(request: Request) {
+    let id: unknown;
     try {
-        const body = await request.json();
+        ({ id } = await request.json());
+    } catch {
+        return Response.json({ error: "リクエストの形式が不正です。" }, { status: 400 });
+    }
 
-        if (!body || typeof body.abstract !== "string") {
-            return Response.json(
-                { error: "abstract は文字列である必要があります。" },
-                { status: 400 }
-            );
+    if (typeof id !== "string" || !isValidArxivId(id)) {
+        return Response.json({ error: "arXiv ID が不正です。" }, { status: 400 });
+    }
+
+    try {
+        const paper = await fetchPaperById(id);
+        if (!paper) {
+            return Response.json({ error: "論文が見つかりませんでした。" }, { status: 404 });
         }
 
-        const abstract = body.abstract.trim();
-
-        if (abstract.length === 0) {
-            return Response.json(
-                { error: "abstract は空にできません。" },
-                { status: 400 }
-            );
-        }
-
-        if (abstract.length > 10000) {
-            return Response.json(
-                { error: "abstract が長すぎます（10,000文字以内）。" },
-                { status: 400 }
-            );
-        }
-
-        const result = await generateExplanation(abstract);
+        const result = await generateExplanation(id, paper.summary);
         return Response.json(result);
     } catch (error) {
+        if (error instanceof GeminiError) {
+            return Response.json({ error: error.message }, { status: error.status });
+        }
         console.error("Summarize API error:", error);
-        return Response.json(
-            {
-                summary: "AI要約を生成できませんでした。",
-                hook: "",
-                difficulty: "",
-                difficulty_reason: "",
-                terms: [],
-            },
-            { status: 500 }
-        );
+        return Response.json({ error: "AI解説の生成に失敗しました。" }, { status: 500 });
     }
 }

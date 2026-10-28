@@ -1,45 +1,14 @@
-import { parseStringPromise } from "xml2js";
 import PaperList from "./components/PaperList";
-import type { Paper, NormalizedPaper } from "./types/Paper";
-import { normalizePaper } from "./components/utils";
-import { arxivCache } from "./lib/cache";
+import type { NormalizedPaper } from "./types/Paper";
+import { fetchRecentPapers, MAX_RESULTS } from "./lib/arxiv";
 
+// シャッフル用のシードをリクエストごとに変えるため動的レンダリングにする
+// （arXivのデータ自体は lib/arxiv.ts で10分間キャッシュされる）
 export const dynamic = "force-dynamic";
 
-const ARXIV_URL =
-    "https://arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=500&sortBy=submittedDate&sortOrder=descending";
-
-async function fetchRecentPapers(): Promise<NormalizedPaper[]> {
-    const cached = arxivCache.get("recent");
-    if (cached) {
-        return JSON.parse(cached) as NormalizedPaper[];
-    }
-
-    const response = await fetch(ARXIV_URL, { cache: "no-store" });
-
-    if (!response.ok) {
-        throw new Error(`arXiv API returned ${response.status}`);
-    }
-
-    const xml = await response.text();
-
-    if (!xml.includes("<feed")) {
-        throw new Error("arXiv API returned invalid response");
-    }
-
-    const result = await parseStringPromise(xml);
-    const papers: Paper[] = result.feed.entry ?? [];
-
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    const recentPapers = papers
-        .filter((paper) => new Date(paper.published[0]) >= oneWeekAgo)
-        .map(normalizePaper);
-
-    arxivCache.set("recent", JSON.stringify(recentPapers));
-
-    return recentPapers;
+// サーバーで決めたシードをクライアントに渡し、ランダム表示をハイドレーションと一致させる
+function createShuffleSeed() {
+    return Math.floor(Math.random() * 2 ** 31);
 }
 
 export default async function Home() {
@@ -52,15 +21,40 @@ export default async function Home() {
     }
 
     return (
-        <main>
-            <h1>PaperCompass</h1>
+        <main className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6">
+            <section className="pt-10 pb-8 sm:pt-14 sm:pb-10">
+                <p className="text-sm font-medium text-accent">
+                    arXiv cs.AI ・ 直近7日間の新着
+                </p>
+                <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+                    今週読む論文を、
+                    <br className="sm:hidden" />
+                    5本から選ぼう。
+                </h1>
+                <p className="mt-4 max-w-2xl leading-relaxed text-muted">
+                    最新のAI論文からランダムに5本をピックアップ。気になる論文を選ぶと、AIが日本語の要約・難易度・重要キーワードを解説します。
+                </p>
+                {recentPapers.length > 0 && (
+                    <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-sm text-muted">
+                        <span className="size-2 rounded-full bg-emerald-500" />
+                        今週の新着論文
+                        <strong className="font-semibold text-foreground">
+                            {recentPapers.length}本
+                            {recentPapers.length >= MAX_RESULTS && "以上"}
+                        </strong>
+                    </p>
+                )}
+            </section>
 
             {recentPapers.length === 0 ? (
-                <p style={{ color: "#666", marginTop: "20px" }}>
-                    論文を取得できませんでした。しばらくしてからもう一度お試しください。
-                </p>
+                <div className="rounded-2xl border border-dashed border-line-strong bg-surface p-10 text-center">
+                    <p className="font-semibold">論文を取得できませんでした</p>
+                    <p className="mt-2 text-sm text-muted">
+                        arXivへの接続に失敗しました。しばらくしてからもう一度お試しください。
+                    </p>
+                </div>
             ) : (
-                <PaperList papers={recentPapers} />
+                <PaperList papers={recentPapers} seed={createShuffleSeed()} />
             )}
         </main>
     );

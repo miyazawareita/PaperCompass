@@ -2,26 +2,18 @@ import Link from "next/link";
 
 export default function NotFound() {
     return (
-        <div style={{ padding: "40px", textAlign: "center" }}>
-            <h2>ページが見つかりませんでした</h2>
-            <p style={{ color: "#666", marginTop: "10px" }}>
+        <main className="mx-auto max-w-md px-4 py-24 text-center">
+            <p className="font-mono text-sm text-accent">404</p>
+            <h1 className="mt-2 text-2xl font-bold">ページが見つかりませんでした</h1>
+            <p className="mt-3 text-muted">
                 お探しのページは存在しないか、移動した可能性があります。
             </p>
             <Link
                 href="/"
-                style={{
-                    display: "inline-block",
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    border: "1px solid #ddd",
-                    backgroundColor: "#2563eb",
-                    color: "white",
-                    textDecoration: "none",
-                }}
+                className="mt-8 inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-fg transition-colors hover:bg-accent-hover"
             >
                 トップに戻る
             </Link>
-        </div>
+        </main>
     );
 }

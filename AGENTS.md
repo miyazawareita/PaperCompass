@@ -6,35 +6,35 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Commands
 
-- `npm run dev` — dev server
+- `npm run dev` — dev server (port 3000; also in `.claude/launch.json`)
 - `npm run build` — production build (also runs type checking)
-- `npm run lint` — ESLint only (no dedicated `typecheck` or `test` script exists)
-- No test framework or test files are set up in this repo
+- `npm run lint` — ESLint
+- `npm test` — Vitest (tests live in `app/__tests__/`)
 
 ## Architecture
 
 Single-page Next.js 16 App Router app (not Pages Router). No monorepo, no packages.
 
-- `app/page.tsx` — Server Component, fetches arXiv API on every request, filters to papers from the last 7 days
-- `app/api/summarize/route.ts` — POST endpoint, calls Gemini API to generate Japanese summaries
-- `app/lib/gemini.ts` — `@google/genai` SDK using model `gemini-2.5-flash`
+- `app/page.tsx` — Server Component, dynamic per request (random shuffle seed); gets papers from `lib/arxiv.ts`
+- `app/lib/arxiv.ts` — arXiv API fetch + parse. Recent cs.AI papers (last 7 days) are cached for 10 min with `unstable_cache` (shared across Vercel instances). `fetchPaperById` looks up one paper for the summarize API
+- `app/api/summarize/route.ts` — POST `{ id: "<arXiv ID>" }`. Only accepts a validated arXiv ID and fetches the abstract server-side, so the endpoint cannot be used as an open Gemini proxy. Errors return non-2xx with `{ error }`
+- `app/lib/gemini.ts` — `@google/genai` with structured JSON output (`responseJsonSchema`). Model is `GEMINI_MODEL` env or `gemini-2.5-flash`. `parseGeminiResponse` validates the output and converts difficulty 1–5 to stars
 - `app/lib/bookmark.ts` — localStorage-based bookmarks (client-only)
-- `app/components/` — all components are client components (`"use client"`)
+- `app/components/` — client components (`"use client"`). Summaries are cached in localStorage as `summary-v2-<arXiv ID>` (only successful results)
 
 ## Critical data model quirk
 
-arXiv XML is parsed via `xml2js`. All fields come back as **arrays**, not strings. Access via `paper.title[0]`, `paper.id[0]`, `paper.summary[0]`, `paper.published[0]`, etc. This is the most common source of bugs when adding features.
+arXiv XML is parsed via `xml2js`. All raw fields come back as **arrays**, not strings (`paper.title[0]`, `paper.id[0]`, ...). Convert with `normalizePaper` right after parsing; everything past `lib/arxiv.ts` uses `NormalizedPaper` with plain strings.
 
 ## Environment
 
-- Requires `GEMINI_API_KEY` in `.env.local` for the summarize endpoint
-- `.env.local` is gitignored
+- `GEMINI_API_KEY` (required) and `GEMINI_MODEL` (optional) in `.env.local` locally, and in Vercel project env vars for deploys
+- `.env*` and `.vercel` are gitignored
 
 ## Styling
 
-- Tailwind CSS v4 via `@tailwindcss/postcss`
-- `app/layout.tsx` uses Tailwind utility classes
-- Most components use inline `style={}` props — this is the existing convention, not a mistake
+- Tailwind CSS v4 via `@tailwindcss/postcss`; design tokens (`text-muted`, `bg-surface`, `text-accent`, ...) are defined in `app/globals.css`
+- Use Tailwind utility classes, not inline `style={}`
 
 ## UI language
 

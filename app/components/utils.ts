@@ -1,10 +1,24 @@
 import type { Paper, NormalizedPaper } from "../types/Paper";
 
+// arXivのタイトル・Abstractは改行や連続スペースを含むので1行に整える
+function collapseWhitespace(text: string) {
+    return text.replace(/\s+/g, " ").trim();
+}
+
+export function formatAuthors(authors: string[], max = 3) {
+    if (authors.length <= max) return authors.join(", ");
+    return `${authors.slice(0, max).join(", ")} 他${authors.length - max}名`;
+}
+
+export function arxivIdFromUrl(url: string) {
+    return url.split("/abs/")[1] ?? url;
+}
+
 export function normalizePaper(paper: Paper): NormalizedPaper {
     return {
         id: paper.id[0],
-        title: paper.title[0],
-        summary: paper.summary[0],
+        title: collapseWhitespace(paper.title[0]),
+        summary: collapseWhitespace(paper.summary[0]),
         published: paper.published[0],
         authors: paper.author.map((a) => a.name[0]),
         categories: paper.category.map((c) => c.$.term),

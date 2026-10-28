@@ -8,25 +8,18 @@ export default function Error({
     reset: () => void;
 }) {
     return (
-        <div style={{ padding: "40px", textAlign: "center" }}>
-            <h2>エラーが発生しました</h2>
-            <p style={{ color: "#666", marginTop: "10px" }}>
+        <main className="mx-auto max-w-md px-4 py-24 text-center">
+            <h1 className="text-2xl font-bold">エラーが発生しました</h1>
+            <p className="mt-3 text-muted">
                 {error.message || "予期しないエラーが発生しました。"}
             </p>
             <button
+                type="button"
                 onClick={reset}
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    border: "1px solid #ddd",
-                    cursor: "pointer",
-                    backgroundColor: "#2563eb",
-                    color: "white",
-                }}
+                className="mt-8 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-fg transition-colors hover:bg-accent-hover"
             >
                 再読み込み
             </button>
-        </div>
+        </main>
     );
 }
